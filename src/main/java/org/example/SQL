@@ -1,1 +1,35 @@
+-- Створення самої бази даних
+
+CREATE DATABASE StudentGrades;
+
+-- Вибір даних для роботи
+
+USE StudentGrades;
+
+-- Створення таблиці "Оцінки студентів"
+
+CREATE TABLE StudentGrades (
+    StudentID INT PRIMARY KEY AUTO_INCREMENT,
+    FullName VARCHAR(255) NOT NULL,
+    City VARCHAR(255),
+    Country VARCHAR(255),
+    DateOfBirth DATE,
+    Email VARCHAR(255),
+    PhoneNumber VARCHAR(20),
+    GroupName VARCHAR(255),
+    AverageGrade DECIMAL(4,2),
+    SubjectWithMinAverage VARCHAR(255),
+    SubjectWithMaxAverage VARCHAR(255)
+);
+
+-- Додавання тестових даних
+
+INSERT INTO StudentGrades (FullName, City, Country, DateOfBirth, Email, PhoneNumber, GroupName, AverageGrade, SubjectWithMinAverage, SubjectWithMaxAverage) VALUES
+    ('Jake Doe', 'New York', 'USA', '2002-03-15', 'doe02jake@gmail.com', '+1 555 123 4567', 'CS101', 3.50, 'Math', 'Physics'),
+    ('John Smith', 'London', 'UK', '2001-08-22', 'smith01@gmail.com', '+44 20 7123 4567', 'CS102', 3.80, 'History', 'Literature'),
+    ('Peter Jones', 'Paris', 'France', '2000-11-09', 'peter0jones@egmail.com', '+33 1 42 34 56 78', 'CS101', 3.20, 'Chemistry', 'Biology');
+
+-- Перевірка наявності даних
+
+SELECT * FROM StudentGrades;
 
