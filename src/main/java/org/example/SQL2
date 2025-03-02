@@ -1,0 +1,17 @@
+-- Відображення всієї інформації з таблиці зі студентами та оцінками
+SELECT * FROM StudentGrades;
+
+-- Відображення ПІБ усіх студентів
+SELECT FullName FROM StudentGrades;
+
+-- Відображення усіх середніх оцінок
+SELECT AverageGrade FROM StudentGrades;
+
+-- Показати країни студентів 
+SELECT DISTINCT Country FROM StudentGrades;
+
+-- Показати міста студентів 
+SELECT DISTINCT City FROM StudentGrades;
+
+-- Показати назви груп 
+SELECT DISTINCT GroupName FROM StudentGrades;
