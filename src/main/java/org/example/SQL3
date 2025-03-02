@@ -1,0 +1,24 @@
+--Визначити кількість країн, які ставали чемпіонами світу.
+INSERT INTO Teams (Country, Champion, OfficialLanguage, Debut, Area, Titles) VALUES
+('Бразилія', TRUE, 'Португальська', FALSE, 8515767, 5),
+('Німеччина', TRUE, 'Німецька', FALSE, 357022, 4),
+('Аргентина', TRUE, 'Іспанська', FALSE, 2780400, 2),
+('Іспанія', TRUE, 'Іспанська', FALSE, 505990, 1),
+('Франція', TRUE, 'Французька', FALSE, 551695, 2),
+('Камерун', FALSE, 'Французька', TRUE, 475442, 0),
+('Коста-Ріка', FALSE, 'Іспанська', TRUE, 51100, 0);
+
+--Кількість країн-учасниць чемпіонату світу:
+SELECT COUNT(*) AS NumberOfCountries FROM Teams;
+
+--Кількість країн, які ставали чемпіонами світу:
+SELECT COUNT(*) AS NumberOfChampions FROM Teams WHERE Champion = TRUE;
+
+--Кількість країн-учасниць чемпіонату світу, де офіційною мовою є іспанська:
+SELECT COUNT(*) AS NumberOfSpanishSpeakingCountries FROM Teams WHERE OfficialLanguage = 'Іспанська';
+
+--Сумарна кількість чемпіонських титулів, які виграли європейські країни-учасниці:
+SELECT SUM(Titles) AS TotalEuropeanTitles FROM Teams WHERE Country IN ('Німеччина', 'Франція', 'Іспанія');
+
+--Середнє значення території серед африканських країн:
+SELECT AVG(Area) AS AverageArea FROM Teams WHERE Country IN ('Камерун');
