@@ -191,3 +191,47 @@ SELECT l.Name AS Language, COUNT(cl.CountryId) AS CountryCount
 FROM Language l
 JOIN CountryLanguage cl ON l.Id = cl.LanguageId
 GROUP BY l.Name;
+
+--африканська країна, територія якої є найменшою:
+SELECT TOP 1 c.Name AS Country
+FROM Country co
+JOIN Continent c ON co.ContinentId = c.Id
+WHERE c.Name = 'Африка'
+ORDER BY co.Territory ASC;
+
+--Відобразити для кожної валюти кількість країн, де ця валюта є національною:
+SELECT cu.Name AS Currency, COUNT(co.Id) AS CountryCount
+FROM Currency cu
+JOIN Country co ON cu.Id = co.CurrencyId
+GROUP BY cu.Name;
+
+-- Відобразити найбільш поширену мову та вказати кількість країн, в яких вона є офіційною:
+SELECT TOP 1 l.Name AS Language, COUNT(cl.CountryId) AS CountryCount
+FROM Language l
+JOIN CountryLanguage cl ON l.Id = cl.LanguageId
+GROUP BY l.Name
+ORDER BY COUNT(cl.CountryId) DESC;
+
+-- Відобразити континент, у якого найвищий сумарний показник за чемпіонськими титулами:
+SELECT TOP 1 c.Name AS Continent, SUM(CASE WHEN co.Champion = 1 THEN 1 ELSE 0 END) AS ChampionCount
+FROM Country co
+JOIN Continent c ON co.ContinentId = c.Id
+GROUP BY c.Name
+ORDER BY SUM(CASE WHEN co.Champion = 1 THEN 1 ELSE 0 END) DESC;
+
+--Відобразити найпоширенішу мову серед країн європейського та африканського континентів:
+SELECT TOP 1 l.Name AS Language, COUNT(cl.CountryId) AS CountryCount
+FROM Language l
+JOIN CountryLanguage cl ON l.Id = cl.LanguageId
+JOIN Country co ON cl.CountryId = co.Id
+JOIN Continent c ON co.ContinentId = c.Id
+WHERE c.Name IN ('Європа', 'Африка')
+GROUP BY l.Name
+ORDER BY COUNT(cl.CountryId) DESC;
+
+--Відобразити кількість країн, представлених кожним континентом на чемпіонаті світу.
+SELECT c.Name AS Continent, COUNT(*) AS CountryCount
+FROM Country co
+JOIN Continent c ON co.ContinentId = c.Id
+WHERE co.Champion = 1
+GROUP BY c.Name;
