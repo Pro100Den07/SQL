@@ -1,0 +1,87 @@
+
+-- 1. Відобразити книги з мінімальною кількістю сторінок, випущені тим чи іншим видавництвом
+SELECT title, publisher, pages 
+FROM books 
+WHERE pages = (SELECT MIN(pages) FROM books);
+
+-- 2. Відобразити назви видавництв, які випустили книги із середньою кількістю сторінок більшою за 100
+SELECT publisher 
+FROM books 
+GROUP BY publisher 
+HAVING AVG(pages) > 100;
+
+-- 4. Вибрати імена та прізвища всіх студентів, які брали книги у проміжку між 1 січня 2019 року та поточною датою
+SELECT DISTINCT students.first_name, students.last_name 
+FROM students
+JOIN borrowings ON students.id = borrowings.student_id
+WHERE borrowings.borrow_date BETWEEN '2019-01-01' AND CURDATE();
+
+-- 6. Відобразити інформацію про авторів, середній обсяг книжок яких (у сторінках) понад 600 сторінок
+SELECT authors.name, AVG(books.pages) AS avg_pages 
+FROM authors
+JOIN books ON authors.id = books.author_id
+GROUP BY authors.name
+HAVING avg_pages > 600;
+
+-- 7. Відобразити інформацію про видавництва, які мають загальну кількість сторінок випущених ними книг більше 700
+SELECT publisher, SUM(pages) AS total_pages 
+FROM books 
+GROUP BY publisher 
+HAVING total_pages > 700;
+
+-- 8. Відобразити всіх відвідувачів бібліотеки (та студентів та викладачів) та книги, які вони брали
+SELECT visitors.first_name, visitors.last_name, books.title 
+FROM visitors
+JOIN borrowings ON visitors.id = borrowings.visitor_id
+JOIN books ON borrowings.book_id = books.id;
+
+-- 12. Відобразити кількість викладачів та студентів, які відвідали бібліотеку
+SELECT 
+    (SELECT COUNT(*) FROM students WHERE id IN (SELECT student_id FROM borrowings)) AS student_count,
+    (SELECT COUNT(*) FROM teachers WHERE id IN (SELECT teacher_id FROM borrowings)) AS teacher_count;
+
+-- 14. Відобразити самий читаючий факультет та найчитальнішу кафедру
+SELECT faculty, COUNT(*) AS borrow_count 
+FROM students
+JOIN borrowings ON students.id = borrowings.student_id
+GROUP BY faculty
+ORDER BY borrow_count DESC
+LIMIT 1;
+
+SELECT department, COUNT(*) AS borrow_count 
+FROM teachers
+JOIN borrowings ON teachers.id = borrowings.teacher_id
+GROUP BY department
+ORDER BY borrow_count DESC
+LIMIT 1;
+
+-- 20. Показати скільки книг видав кожен із бібліотекарів
+SELECT librarians.name, COUNT(*) AS books_issued 
+FROM librarians
+JOIN borrowings ON librarians.id = borrowings.librarian_id
+GROUP BY librarians.name;
+
+-- 9. Вивести найпопулярнішого автора серед студентів та кількість книг цього автора, взятих у бібліотеці
+SELECT authors.name, COUNT(*) AS book_count 
+FROM authors
+JOIN books ON authors.id = books.author_id
+JOIN borrowings ON books.id = borrowings.book_id
+JOIN students ON borrowings.student_id = students.id
+GROUP BY authors.name
+ORDER BY book_count DESC
+LIMIT 1;
+
+-- 11. Вивести найпопулярнішу тематику серед студентів та викладачів
+SELECT categories.name, COUNT(*) AS category_count 
+FROM categories
+JOIN books ON categories.id = books.category_id
+JOIN borrowings ON books.id = borrowings.book_id
+GROUP BY categories.name
+ORDER BY category_count DESC
+LIMIT 1;
+
+-- 19. Показати книги, які брали і викладачі та студенти
+SELECT DISTINCT books.title 
+FROM books
+JOIN borrowings ON books.id = borrowings.book_id
+WHERE borrowings.student_id IS NOT NULL AND borrowings.teacher_id IS NOT NULL;
