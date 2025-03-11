@@ -1,0 +1,201 @@
+--Привітання:
+CREATE FUNCTION GreetUser ( @name VARCHAR(255) )
+RETURNS VARCHAR(255)
+AS
+BEGIN
+    DECLARE @greeting VARCHAR(255);
+    SET @greeting = 'Hello, ' + @name + '!';
+    RETURN @greeting;
+END;
+
+--Поточна кількість хвилин:
+CREATE FUNCTION GetCurrentMinutes()
+RETURNS INT
+AS
+BEGIN
+    DECLARE @minutes INT;
+    SELECT @minutes = DATEPART(MINUTE, GETDATE());
+    RETURN @minutes;
+END;
+
+--Поточний рік:
+CREATE FUNCTION GetCurrentYear()
+RETURNS INT
+AS
+BEGIN
+    DECLARE @year INT;
+    SELECT @year = DATEPART(YEAR, GETDATE());
+    RETURN @year;
+END;
+
+--Парний/непарний рік:
+CREATE FUNCTION IsYearEven( @year INT )
+RETURNS VARCHAR(10)
+AS
+BEGIN
+    DECLARE @result VARCHAR(10);
+    IF @year % 2 = 0
+        SET @result = 'Even';
+    ELSE
+        SET @result = 'Odd';
+    RETURN @result;
+END;
+
+--Просте число:
+CREATE FUNCTION IsPrimeNumber( @number INT )
+RETURNS VARCHAR(3)
+AS
+BEGIN
+    DECLARE @result VARCHAR(3);
+    DECLARE @i INT;
+    SET @i = 2;
+    IF @number <= 1
+        SET @result = 'no';
+    ELSE
+        WHILE @i * @i <= @number
+        BEGIN
+            IF @number % @i = 0
+                SET @result = 'no';
+            SET @i = @i + 1;
+        END;
+    IF @result IS NULL
+        SET @result = 'yes';
+    RETURN @result;
+END;
+
+--Сума мінімального та максимального:
+CREATE FUNCTION SumMinMax( @num1 INT, @num2 INT, @num3 INT, @num4 INT, @num5 INT )
+RETURNS INT
+AS
+BEGIN
+    DECLARE @min INT;
+    DECLARE @max INT;
+    SET @min = @num1;
+    SET @max = @num1;
+    IF @num2 < @min
+        SET @min = @num2;
+    IF @num2 > @max
+        SET @max = @num2;
+    IF @num3 < @min
+        SET @min = @num3;
+    IF @num3 > @max
+        SET @max = @num3;
+    IF @num4 < @min
+        SET @min = @num4;
+    IF @num4 > @max
+        SET @max = @num4;
+    IF @num5 < @min
+        SET @min = @num5;
+    IF @num5 > @max
+        SET @max = @num5;
+    RETURN @min + @max;
+END;
+
+--Парні/непарні числа в діапазоні:
+CREATE FUNCTION ShowEvenOddNumbers( @start INT, @end INT, @evenOdd VARCHAR(5) )
+RETURNS VARCHAR(MAX)
+AS
+BEGIN
+    DECLARE @result VARCHAR(MAX);
+    SET @result = '';
+    DECLARE @i INT;
+    SET @i = @start;
+    WHILE @i <= @end
+    BEGIN
+        IF @evenOdd = 'Even' AND @i % 2 = 0
+            SET @result = @result + CAST(@i AS VARCHAR) + ', ';
+        IF @evenOdd = 'Odd' AND @i % 2 <> 0
+            SET @result = @result + CAST(@i AS VARCHAR) + ', ';
+        SET @i = @i + 1;
+    END;
+    IF LEN(@result) > 0
+        SET @result = SUBSTRING(@result, 1, LEN(@result) - 2);
+    RETURN @result;
+END;
+
+--Збережені процедури:
+Hello, world!:
+CREATE PROCEDURE HelloWorld
+AS
+BEGIN
+    PRINT 'Hello, world!';
+END;
+Поточний час:
+CREATE PROCEDURE GetCurrentTime
+AS
+BEGIN
+    SELECT GETDATE() AS CurrentTime;
+END;
+
+--Поточна дата:
+CREATE PROCEDURE GetCurrentDate
+AS
+BEGIN
+    SELECT GETDATE() AS CurrentDate;
+END;
+
+--Сума трьох чисел:
+CREATE PROCEDURE SumThreeNumbers( @num1 INT, @num2 INT, @num3 INT )
+AS
+BEGIN
+    SELECT @num1 + @num2 + @num3 AS Sum;
+END;
+
+--Середньоарифметичне:
+CREATE PROCEDURE AverageThreeNumbers( @num1 INT, @num2 INT, @num3 INT )
+AS
+BEGIN
+    SELECT (@num1 + @num2 + @num3) / 3 AS Average;
+END;
+
+--Максимальне значення:
+CREATE PROCEDURE MaxThreeNumbers( @num1 INT, @num2 INT, @num3 INT )
+AS
+BEGIN
+    SELECT MAX(@num1, @num2, @num3) AS Maximum;
+END;
+
+--Мінімальне значення:
+CREATE PROCEDURE MinThreeNumbers( @num1 INT, @num2 INT, @num3 INT )
+AS
+BEGIN
+    SELECT MIN(@num1, @num2, @num3) AS Minimum;
+END;
+
+--Лінія символів:
+CREATE PROCEDURE DrawLine( @length INT, @symbol VARCHAR(1) )
+AS
+BEGIN
+    DECLARE @i INT;
+    SET @i = 1;
+    WHILE @i <= @length
+    BEGIN
+        PRINT @symbol;
+        SET @i = @i + 1;
+    END;
+END;
+
+--Факторіал:
+CREATE PROCEDURE CalculateFactorial( @number INT )
+AS
+BEGIN
+    DECLARE @factorial INT;
+    SET @factorial = 1;
+    DECLARE @i INT;
+    SET @i = 1;
+    WHILE @i <= @number
+    BEGIN
+        SET @factorial = @factorial * @i;
+        SET @i = @i + 1;
+    END;
+    SELECT @factorial AS Factorial;
+END;
+
+--Зведення до ступеня:
+CREATE PROCEDURE Power( @number INT, @degree INT )
+AS
+BEGIN
+    DECLARE @result INT;
+    SET @result = POWER(@number, @degree);
+    SELECT @result AS Result;
+END;
