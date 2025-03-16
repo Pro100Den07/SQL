@@ -1,0 +1,127 @@
+--1.ПІБ:
+
+SELECT first_name, last_name 
+FROM Barbers;
+
+--2. інформацію про всіх синьйор-барберів:
+SELECT * 
+FROM Barbers 
+WHERE position = 'senior_barber';
+
+--3. інформацію про всіх барберів, які можуть надати послугу традиційного гоління бороди:
+SELECT b.first_name, b.last_name 
+FROM Barbers b
+JOIN Barber_Services bs ON b.barber_id = bs.barber_id
+JOIN Services s ON bs.service_id = s.service_id
+WHERE s.name = 'Традиційне гоління бороди';
+
+--4. Повернути інформацію про всіх барберів, які можуть надати конкретну послугу:
+CREATE PROCEDURE GetBarbersByService(IN serviceName VARCHAR(255))
+BEGIN
+  SELECT b.first_name, b.last_name 
+  FROM Barbers b
+  JOIN Barber_Services bs ON b.barber_id = bs.barber_id
+  JOIN Services s ON bs.service_id = s.service_id
+  WHERE s.name = serviceName;
+END;
+
+--5. Повернути інформацію про всіх барберів, які працюють понад зазначену кількість років:
+CREATE PROCEDURE GetBarbersByYears(IN years INT)
+BEGIN
+  SELECT first_name, last_name 
+  FROM Barbers 
+  WHERE hire_date < DATE_SUB(CURDATE(), INTERVAL years YEAR);
+END;
+
+--6. Повернути кількість синьйор-барберів та кількість джуніор-барберів:
+SELECT 
+  SUM(CASE WHEN position = 'senior_barber' THEN 1 ELSE 0 END) AS senior_count,
+  SUM(CASE WHEN position = 'junior_barber' THEN 1 ELSE 0 END) AS junior_count
+FROM Barbers;
+
+--7. Повернути інформацію про постійних клієнтів:
+CREATE PROCEDURE GetRegularClients(IN visitCount INT)
+BEGIN
+  SELECT c.first_name, c.last_name 
+  FROM Clients c
+  JOIN Visits v ON c.client_id = v.client_id
+  GROUP BY c.client_id
+  HAVING COUNT(DISTINCT v.visit_id) >= visitCount;
+END;
+
+--8. Заборонити можливість видалення інформації про чиф-барбер, якщо не додано другий чиф-барбер:
+CREATE TRIGGER before_delete_chief_barber
+BEFORE DELETE ON Barbers
+FOR EACH ROW
+BEGIN
+  IF OLD.position = 'chief_barber' THEN
+    IF (SELECT COUNT(*) FROM Barbers WHERE position = 'chief_barber') <= 1 THEN
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Неможливо видалити єдиного чиф-барбера.';
+    END IF;
+  END IF;
+END;
+
+--9. Заборонити додавати барберів молодше 21 року:
+CREATE TRIGGER before_insert_barber
+BEFORE INSERT ON Barbers
+FOR EACH ROW
+BEGIN
+  IF NEW.birthdate > DATE_SUB(CURDATE(), INTERVAL 21 YEAR) THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Неможливо додати барбера молодше 21 року.';
+  END IF;
+END;
+Тригери:
+
+--1. При додаванні рядка в архів (там же є оцінка), корегувати загальну оцінку в таблиці барберов:
+CREATE TRIGGER update_barber_rating
+AFTER INSERT ON Visits
+FOR EACH ROW
+BEGIN
+  UPDATE Barbers
+  SET rating = (SELECT AVG(rating) FROM Visits WHERE barber_id = NEW.barber_id)
+  WHERE barber_id = NEW.barber_id;
+END;
+
+--2. Не можна додати запис до барбера, якого немає чи в якого немає вільного часу, тобто на цей час він вже зайнятий:
+CREATE TRIGGER check_barber_availability
+BEFORE INSERT ON Schedule
+FOR EACH ROW
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM Barbers WHERE barber_id = NEW.barber_id) THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Барбера з таким ID не існує.';
+  END IF;
+  IF EXISTS (SELECT 1 FROM Schedule 
+             WHERE barber_id = NEW.barber_id
+             AND date = NEW.date
+             AND (NEW.start_time BETWEEN start_time AND end_time
+             OR NEW.end_time BETWEEN start_time AND end_time)) THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Барбер зайнятий в цей час.';
+  END IF;
+END;
+
+--3. Не можна записати на один день до одного барбера одну і ту саму людину делькілька разів:
+CREATE TRIGGER prevent_duplicate_appointments
+BEFORE INSERT ON Schedule
+FOR EACH ROW
+BEGIN
+  IF EXISTS (SELECT 1 FROM Schedule
+             WHERE barber_id = NEW.barber_id
+             AND client_id = NEW.client_id
+             AND date = NEW.date) THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Клієнт вже записаний на цей день до цього барбера.';
+  END IF;
+END;
+Квери для перевірки тригерів:
+
+--1. Додавання нового відвідування:
+
+INSERT INTO Visits (client_id, barber_id, service_id, visit_date, total_cost, rating, feedback) 
+VALUES (1, 2, 1, '2023-12-20', 200, 4.5, 'Чудово!');
+
+--2. Додавання нового запису в розклад:
+INSERT INTO Schedule (barber_id, date, start_time, end_time, client_id)
+VALUES (1, '2023-12-21', '10:00:00', '11:00:00', 2);
+
+==3. Спроба записати клієнта до того ж барбера на той же день:
+INSERT INTO Schedule (barber_id, date, start_time, end_time, client_id)
+VALUES (1, '2023-12-21', '12:00:00', '13:00:00', 2);
