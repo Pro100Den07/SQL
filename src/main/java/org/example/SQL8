@@ -1,0 +1,73 @@
+-- Таблиця барберів
+CREATE TABLE Barbers (
+    BarberID INT PRIMARY KEY IDENTITY(1,1),
+    FirstName NVARCHAR(50) NOT NULL,
+    LastName NVARCHAR(50) NOT NULL,
+    Gender CHAR(1) NOT NULL,
+    PhoneNumber VARCHAR(20) NOT NULL,
+    Email VARCHAR(100) NOT NULL,
+    BirthDate DATE NOT NULL,
+    HireDate DATE NOT NULL,
+    Position VARCHAR(20) NOT NULL,
+    Rating DECIMAL(2, 1)
+);
+
+-- Індекс для швидкого пошуку за прізвищем барбера
+CREATE NONCLUSTERED INDEX IX_Barbers_LastName ON Barbers (LastName);
+
+-- Таблиця послуг
+CREATE TABLE Services (
+    ServiceID INT PRIMARY KEY IDENTITY(1,1),
+    ServiceName VARCHAR(50) NOT NULL,
+    Price DECIMAL(6, 2) NOT NULL,
+    Duration INT NOT NULL
+);
+
+-- Індекс для швидкого пошуку за назвою послуги
+CREATE NONCLUSTERED INDEX IX_Services_ServiceName ON Services (ServiceName);
+
+-- Таблиця розкладу барберів
+CREATE TABLE BarberSchedule (
+    ScheduleID INT PRIMARY KEY IDENTITY(1,1),
+    BarberID INT NOT NULL,
+    Date DATE NOT NULL,
+    StartTime TIME NOT NULL,
+    EndTime TIME NOT NULL,
+    Available BIT NOT NULL,
+    FOREIGN KEY (BarberID) REFERENCES Barbers(BarberID)
+);
+
+-- Індекс для швидкого пошуку за доступністю барбера на певну дату
+CREATE NONCLUSTERED INDEX IX_BarberSchedule_BarberID_Date ON BarberSchedule (BarberID, Date);
+
+-- Таблиця клієнтів
+CREATE TABLE Clients (
+    ClientID INT PRIMARY KEY IDENTITY(1,1),
+    FirstName NVARCHAR(50) NOT NULL,
+    LastName NVARCHAR(50) NOT NULL,
+    PhoneNumber VARCHAR(20) NOT NULL,
+    Email VARCHAR(100) NOT NULL,
+    Rating DECIMAL(2, 1)
+);
+
+-- Індекс для швидкого пошуку за прізвищем клієнта
+CREATE NONCLUSTERED INDEX IX_Clients_LastName ON Clients (LastName);
+
+-- Таблиця відвідувань
+CREATE TABLE Visits (
+    VisitID INT PRIMARY KEY IDENTITY(1,1),
+    ClientID INT NOT NULL,
+    BarberID INT NOT NULL,
+    ServiceID INT NOT NULL,
+    VisitDate DATE NOT NULL,
+    VisitTime TIME NOT NULL,
+    TotalCost DECIMAL(6, 2) NOT NULL,
+    Rating INT,
+    Feedback TEXT,
+    FOREIGN KEY (ClientID) REFERENCES Clients(ClientID),
+    FOREIGN KEY (BarberID) REFERENCES Barbers(BarberID),
+    FOREIGN KEY (ServiceID) REFERENCES Services(ServiceID)
+);
+
+-- Індекс для швидкого пошуку за відвідуваннями клієнта на певну дату
+CREATE NONCLUSTERED INDEX IX_Visits_ClientID_VisitDate ON Visits (ClientID, VisitDate);
