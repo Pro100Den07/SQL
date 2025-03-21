@@ -15,6 +15,9 @@ CREATE TABLE Barbers (
 -- Індекс для швидкого пошуку за прізвищем барбера
 CREATE NONCLUSTERED INDEX IX_Barbers_LastName ON Barbers (LastName);
 
+-- Покриваючий індекс для запитів, що використовують FirstName, LastName, Rating
+CREATE NONCLUSTERED INDEX IX_Barbers_Covering ON Barbers (LastName) INCLUDE (FirstName, Rating);
+
 -- Таблиця послуг
 CREATE TABLE Services (
     ServiceID INT PRIMARY KEY IDENTITY(1,1),
@@ -25,6 +28,9 @@ CREATE TABLE Services (
 
 -- Індекс для швидкого пошуку за назвою послуги
 CREATE NONCLUSTERED INDEX IX_Services_ServiceName ON Services (ServiceName);
+
+-- Покриваючий індекс для запитів, що використовують Price, ServiceName
+CREATE NONCLUSTERED INDEX IX_Services_Covering ON Services (Price) INCLUDE (ServiceName);
 
 -- Таблиця розкладу барберів
 CREATE TABLE BarberSchedule (
@@ -71,3 +77,21 @@ CREATE TABLE Visits (
 
 -- Індекс для швидкого пошуку за відвідуваннями клієнта на певну дату
 CREATE NONCLUSTERED INDEX IX_Visits_ClientID_VisitDate ON Visits (ClientID, VisitDate);
+
+-- Покриваючий індекс для запитів, що використовують ClientID, VisitDate, TotalCost
+CREATE NONCLUSTERED INDEX IX_Visits_Covering ON Visits (ClientID) INCLUDE (VisitDate, TotalCost);
+
+-- Запит на отримання інформації про барберів за прізвищем:
+SELECT FirstName, LastName, Rating 
+FROM Barbers 
+WHERE LastName = 'John';
+
+-- Запит на отримання всіх відвідувань клієнта:
+SELECT VisitDate, TotalCost 
+FROM Visits 
+WHERE ClientID = 1;
+
+-- Запит на отримання послуг за ціною:
+SELECT ServiceName, Price 
+FROM Services 
+WHERE Price < 200;
